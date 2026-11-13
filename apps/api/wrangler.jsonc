@@ -1,0 +1,52 @@
+// The Worker binds nothing of its own, so this file is committed as-is (no
+// wiring template). Orun deploys with `--env stage` / `--env prod`; wrangler
+// names the Worker nitro-api-<env> from the top-level name. Each
+// environment's ENVIRONMENT var is what GET /health reports.
+//
+// How the Nitro app runs here:
+// - `nitro build` (the cloudflare_module preset, nitro.config.ts) emits the
+//   Worker as .output/server/index.mjs and the static output as
+//   .output/public; wrangler bundles the first and uploads the second. Nitro's
+//   own generated config is off (deployConfig: false), so this is the one
+//   config a deploy reads.
+// - `assets` with the ASSETS binding is how the preset serves Nitro's public
+//   assets: a file added under server/public/ is served by Workers Static
+//   Assets before the Worker runs, and the Worker's own asset lookup goes
+//   through env.ASSETS. The template ships none, so today the directory holds
+//   only the preset's (empty) _headers file.
+// - nodejs_compat: the output imports node:process, node:events, node:buffer
+//   and node:timers.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nitro-api",
+  "main": "./.output/server/index.mjs",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./.output/public",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ENVIRONMENT": "local"
+  },
+  "env": {
+    "dev": {
+      "vars": {
+        "ENVIRONMENT": "dev"
+      }
+    },
+    "stage": {
+      "vars": {
+        "ENVIRONMENT": "stage"
+      }
+    },
+    "prod": {
+      "vars": {
+        "ENVIRONMENT": "prod"
+      }
+    }
+  }
+}

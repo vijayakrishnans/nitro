@@ -1,0 +1,15 @@
+// https://nitro.unjs.io/guide/typescript
+//
+// The template's: Nitro writes .nitro/types/tsconfig.json (the auto-imports
+// such as defineEventHandler, and the server/ sources) on `nitro prepare`,
+// which the package's `prepare` and `typecheck` scripts run first. That file
+// includes every file of the package with allowJs, so the lint config (and
+// the shared one it imports) is excluded here: it is checked by eslint, not
+// by the app's types. Strict, as the rest of the workspace is.
+{
+  "extends": "./.nitro/types/tsconfig.json",
+  "compilerOptions": {
+    "strict": true
+  },
+  "exclude": ["eslint.config.js", "node_modules", ".output"]
+}
